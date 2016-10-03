@@ -15,7 +15,14 @@ const getClassNameFromExpression = (expression, className) => {
       } else {
         return '';
       }
+    case 'CallExpression':
+      if (expression.callee.name === 'cx' && expression.arguments.length === 1) {
+        return expression.arguments[0].value;
+      } else {
+        return '';
+      }
     default:
+      console.log(">>> expression: ", expression);
       return '';
   }
 };
