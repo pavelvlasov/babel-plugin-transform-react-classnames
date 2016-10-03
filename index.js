@@ -6,16 +6,44 @@ const delimiters = {
   modifier: '--'
 };
 
-const getClassName = (attributeNode, className) => {
+const getClassNameFromExpression = (expression, className) => {
+  switch(expression.type) {
+    case 'TaggedTemplateExpression':
+      if (expression.tag.name === 'cx' &&
+      !expression.quasi.expressions.length) {
+        return expression.quasi.quasis[0].value.raw;
+      } else {
+        return '';
+      }
+    default:
+      return '';
+  }
+};
+
+const getClassName = (attributeNode, parentClassName) => {
   if (!attributeNode) {
-    return className;
+    return parentClassName;
   }
 
   const value = attributeNode.value;
+  let className = '';
 
-  return className ?
-    className + delimiters.element + value.value :
-    value.value;
+  switch(value.type) {
+    case 'StringLiteral':
+      className = value.value;
+      break;
+
+    case 'JSXExpressionContainer':
+      className = getClassNameFromExpression(value.expression);
+      break;
+
+    default:
+      console.warn('Enexpected className value');
+      return null;
+  };
+
+  return parentClassName ? parentClassName + delimiters.element +
+    className : className;
 };
 
 const findClassNameAttribute = (attributes) =>
